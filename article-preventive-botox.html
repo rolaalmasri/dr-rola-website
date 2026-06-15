@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>البوتوكس الوقائي - دكتورة رولا المصري</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* --- الهيدر المطابق للرئيسية --- */
+        header {
+            background-color: rgba(88, 50, 109, 0.85); 
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            width: 100%;
+            padding: 8px 0; 
+            position: fixed;
+            top: 0;
+            z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease-in-out;
+            display: flex;
+            align-items: center;
+            height: 60px; 
+        }
+
+        header.scrolled {
+            background-color: rgba(255, 255, 255, 0.98); 
+            border-bottom: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 5px 0;
+        }
+
+        .header-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 25px;
+            width: 100%;
+            position: relative;
+        }
+
+        .logo { position: relative; width: 120px; height: 100%; }
+        .logo img {
+            width: auto;
+            display: block;
+            transition: all 0.4s ease;
+            object-fit: contain;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .logo .logo-default { height: 100px; opacity: 1; visibility: visible; }
+        .logo .logo-scrolled { height: 85px; opacity: 0; visibility: hidden; }
+
+        header.scrolled .logo .logo-default { opacity: 0; visibility: hidden; }
+        header.scrolled .logo .logo-scrolled { opacity: 1; visibility: visible; transform: translateY(-50%); }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            margin: 0;
+            padding: 0;
+            gap: 65px;
+            justify-content: center;
+            flex-grow: 1;
+        }
+
+        .nav-links li a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 1.3rem;
+            font-weight: 600;
+            transition: color 0.3s ease;
+            white-space: nowrap;
+        }
+
+        header.scrolled .nav-links li a { color: #333333; }
+
+        /* --- تنسيق الصفحة الحالية (النشطة) --- */
+        .nav-links li a.active-link {
+            position: relative;
+            color: #ffffff; /* يبقى أبيض في الأعلى */
+        }
+
+        /* الخط الأنيق أسفل كلمة الصفحة الحالية */
+        .nav-links li a.active-link::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: #ffffff;
+            border-radius: 2px;
+            box-shadow: 0 2px 5px rgba(255,255,255,0.3);
+        }
+
+        /* تعديل لون الخط النشط عند النزول بالصفحة (الهيدر الأبيض) */
+        header.scrolled .nav-links li a.active-link {
+            color: #58326d !important;
+            font-weight: 800; /* جعل الكلمة أعرض قليلاً لتمييزها */
+        }
+        header.scrolled .nav-links li a.active-link::after {
+            background: linear-gradient(90deg, #58326d, #7b459c);
+            box-shadow: 0 2px 5px rgba(88, 50, 109, 0.2);
+        }
+
+        .menu-icon { 
+            color: white; 
+            font-size: 2.2rem;
+            cursor: pointer;
+            display: block; 
+            line-height: 1;
+            transition: color 0.3s ease;
+            user-select: none;
+            margin-right: 15px;
+            z-index: 2100;
+        }
+
+        header.scrolled .menu-icon { color: #333333; }
+
+        /* --- تنسيقات الجسم والبطاقات --- */
+        body {
+            margin: 0;
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .articles-hero {
+            width: 100%;
+            height: 40vh;
+            background: linear-gradient(rgba(88, 50, 109, 0.7), rgba(88, 50, 109, 0.85)), 
+                        url('https://i.postimg.cc/PfbMcY9Z/Chat-GPT-Image-Jun-15-2026-12-04-39-PM.png');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding-top: 60px;
+        }
+
+        .articles-hero h1 { font-size: 3rem; margin-bottom: 10px; text-shadow: 2px 2px 10px rgba(0,0,0,0.3); }
+
+        .articles-container {
+            max-width: 1200px;
+            margin: -60px auto 80px;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .article-card {
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            transition: 0.4s;
+            border: 1px solid #f0eaf5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .article-card:hover { transform: translateY(-10px); }
+
+        .article-image-box { position: relative; height: 230px; overflow: hidden; }
+        .article-image-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.6s; }
+        .article-card:hover .article-image-box img { transform: scale(1.1); }
+
+        .category-tag {
+            position: absolute; top: 15px; right: 15px; background: #58326d;
+            color: white; padding: 5px 15px; border-radius: 50px; font-size: 0.8rem; font-weight: bold;
+        }
+
+        .article-content { padding: 25px; flex-grow: 1; text-align: right; }
+        .article-date { font-size: 0.85rem; color: #8e44ad; margin-bottom: 10px; display: block; }
+        .article-content h2 { font-size: 1.4rem; margin: 0 0 15px 0; color: #58326d; line-height: 1.4; }
+        .article-content p { font-size: 1rem; color: #666; line-height: 1.6; margin-bottom: 20px; }
+
+        .read-more-btn {
+            color: #58326d; text-decoration: none; font-weight: bold;
+            display: inline-flex; align-items: center; gap: 8px; transition: 0.3s;
+        }
+        .read-more-btn:hover { gap: 15px; color: #8e44ad; }
+
+        /* --- الفوتر المطابق للرئيسية --- */
+        footer {
+            background-color: #58326d;
+            color: white;
+            padding: 60px 20px 20px;
+            width: 100%;
+            box-sizing: border-box;
+            position: relative;
+            text-align: right;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-logo img { height: 140px; width: auto; margin-bottom: 10px; display: block; object-fit: contain; }
+        .footer-column h3 { font-size: 1.5rem; margin-bottom: 20px; position: relative; display: inline-block; }
+        .footer-column h3::after { content: ''; width: 50%; height: 3px; background: #fff; position: absolute; bottom: -5px; right: 0; border-radius: 2px; }
+        
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 12px; }
+        .footer-links li a { color: rgba(255, 255, 255, 0.8); text-decoration: none; transition: all 0.3s; display: inline-block; }
+        .footer-links li a:hover { color: white; transform: translateX(-5px); }
+
+        .footer-social { display: flex; gap: 15px; margin-top: 20px; }
+        .footer-social a {
+            width: 45px; height: 45px; background: rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; color: white; text-decoration: none; 
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); font-size: 1.3rem;
+        }
+        .footer-social a:hover { background: white; transform: translateY(-8px); }
+        .footer-social a.wa:hover { color: #25D366; }
+.footer-social a.ig:hover { color: #E4405F; }
+.footer-social a.tk:hover { color: #000000; }
+.footer-social a.snap:hover { color: #FFFC00; }
+.footer-social a.x:hover { color: #000000; }
+
+        .footer-bottom {
+            text-align: center; padding-top: 40px; margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.9rem; color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* --- استعلامات الموبايل --- */
+        @media (max-width: 768px) {
+            .nav-links { 
+                position: fixed; top: 0; right: -100%; width: 250px; height: 100vh;
+                background-color: #58326d; flex-direction: column; justify-content: flex-start;
+                padding: 80px 30px; gap: 25px; transition: 0.4s ease-in-out; display: flex !important;
+            }
+            .nav-links.active { right: 0; }
+            .articles-hero h1 { font-size: 2.2rem; }
+            .articles-container { grid-template-columns: 1fr; width: 92%; }
+
+            footer { text-align: center; }
+            .footer-container { grid-template-columns: 1fr; gap: 30px; }
+            .footer-logo img { margin: 0 auto 10px; }
+            .footer-column h3::after { right: 25%; left: 25%; width: 50%; }
+            .footer-social { justify-content: center; }
+        }
+        
+
+@media (max-width: 768px) {
+    .single-article-box {
+        padding: 22px;
+    }
+
+    .single-article-box img {
+        height: 260px;
+    }
+
+    .single-article-box h1 {
+        font-size: 1.8rem;
+    }
+}
+.article-details-page {
+    width: 100%;
+    background: #f4f7f6;
+    padding: 80px 20px;
+    box-sizing: border-box;
+}
+
+.article-layout {
+    max-width: 1350px;
+    margin: -120px auto 0;
+    display: grid;
+    grid-template-columns: 1fr 330px;
+    gap: 30px;
+    position: relative;
+    z-index: 10;
+    align-items: start;
+}
+
+.article-main-content {
+    background: #fff;
+    border-radius: 30px;
+    padding: 35px;
+    box-shadow: 0 20px 60px rgba(88, 50, 109, 0.10);
+    border: 1px solid #f0eaf5;
+}
+
+.article-cover {
+    width: 100%;
+    height: 430px;
+    border-radius: 24px;
+    overflow: hidden;
+    margin-bottom: 25px;
+}
+
+.article-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.article-meta span {
+    background: #f7f0fb;
+    color: #58326d;
+    padding: 8px 15px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.article-main-content h1 {
+    color: #58326d;
+    font-size: 3rem;
+    line-height: 1.4;
+    margin: 15px 0 20px;
+}
+
+.article-main-content h2 {
+    color: #58326d;
+    font-size: 1.8rem;
+    margin: 35px 0 15px;
+    position: relative;
+    padding-right: 18px;
+}
+
+.article-main-content h2::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 8px;
+    width: 5px;
+    height: 28px;
+    background: linear-gradient(#58326d, #9b59b6);
+    border-radius: 10px;
+}
+
+.article-main-content p {
+    color: #444;
+    font-size: 1.15rem;
+    line-height: 2.15;
+    margin-bottom: 18px;
+}
+
+.article-intro {
+    background: #fdfbff;
+    border-right: 5px solid #58326d;
+    padding: 20px;
+    border-radius: 18px;
+    color: #333 !important;
+    font-weight: 500;
+}
+
+.doctor-note {
+    background: linear-gradient(135deg, #58326d, #7b459c);
+    color: #fff;
+    padding: 20px;
+    border-radius: 20px;
+    margin: 25px 0;
+    line-height: 2;
+    box-shadow: 0 12px 30px rgba(88, 50, 109, 0.18);
+}
+
+.article-list {
+    background: #fdfbff;
+    padding: 25px 45px 25px 25px;
+    border-radius: 20px;
+    border: 1px solid #f0eaf5;
+}
+
+.article-list li {
+    margin-bottom: 12px;
+    color: #444;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.back-articles-btn {
+    margin-top: 30px;
+    color: #fff;
+    background: linear-gradient(135deg, #58326d, #7b459c);
+    padding: 13px 28px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: bold;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.article-sidebar {
+    position: sticky;
+    top: 90px;
+}
+
+.sidebar-box {
+    background: #fff;
+    border-radius: 25px;
+    padding: 25px;
+    margin-bottom: 22px;
+    box-shadow: 0 15px 40px rgba(88, 50, 109, 0.08);
+    border: 1px solid #f0eaf5;
+}
+
+.sidebar-box h3 {
+    color: #58326d;
+    font-size: 1.4rem;
+    margin-top: 0;
+    margin-bottom: 18px;
+}
+
+.sidebar-box p {
+    color: #555;
+    line-height: 1.8;
+}
+
+.sidebar-box ul {
+    padding-right: 20px;
+    margin: 0;
+}
+
+.sidebar-box li {
+    color: #555;
+    margin-bottom: 10px;
+    line-height: 1.7;
+}
+
+.sidebar-box a {
+    display: block;
+    color: #58326d;
+    text-decoration: none;
+    font-weight: 700;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0eaf5;
+}
+
+.sidebar-box a:last-child {
+    border-bottom: none;
+}
+
+.sidebar-box a:hover {
+    color: #8e44ad;
+    transform: translateX(-5px);
+}
+
+@media (max-width: 992px) {
+    .article-layout {
+        grid-template-columns: 1fr;
+        margin-top: -80px;
+    }
+
+    .article-sidebar {
+        position: static;
+    }
+
+    .article-main-content h1 {
+        font-size: 2.1rem;
+    }
+
+    .article-cover {
+        height: 280px;
+    }
+}
+
+@media (max-width: 768px) {
+    .article-details-page {
+        padding: 50px 15px;
+    }
+
+    .article-main-content {
+        padding: 22px;
+        border-radius: 24px;
+    }
+
+    .article-main-content p {
+        font-size: 1rem;
+        line-height: 2;
+    }
+
+    .article-main-content h2 {
+        font-size: 1.45rem;
+    }
+
+    .article-meta span {
+        font-size: 0.8rem;
+    }
+}
+.floating-whatsapp{
+    position:fixed;
+    right:20px;
+    bottom:25px;
+    width:65px;
+    height:65px;
+    border-radius:50%;
+    background:#25D366;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:32px;
+    text-decoration:none;
+    z-index:9999;
+    box-shadow:0 10px 25px rgba(37,211,102,.4);
+    transition:.3s;
+}
+
+.scroll-top-btn{
+    position:fixed;
+    left:20px;
+    bottom:25px;
+    width:60px;
+    height:60px;
+    border:none;
+    border-radius:50%;
+    background:#58326d;
+    color:#fff;
+    font-size:22px;
+    cursor:pointer;
+    z-index:9999;
+    opacity:0;
+    visibility:hidden;
+    transition:.3s;
+    box-shadow:0 10px 25px rgba(88,50,109,.35);
+}
+
+.scroll-top-btn.show{
+    opacity:1;
+    visibility:visible;
+}
+
+@media(max-width:768px){
+
+    .floating-whatsapp{
+        width:58px;
+        height:58px;
+        font-size:28px;
+    }
+
+    .scroll-top-btn{
+        width:55px;
+        height:55px;
+        font-size:20px;
+    }
+
+}
+.floating-whatsapp{
+    animation:
+        whatsappFloat 3s ease-in-out infinite,
+        whatsappPulse 2s infinite;
+}
+
+.scroll-top-btn.show{
+    animation: topFloat 3s ease-in-out infinite;
+}
+
+@keyframes whatsappFloat{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+    100%{transform:translateY(0);}
+}
+
+@keyframes topFloat{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+    100%{transform:translateY(0);}
+}
+
+@keyframes whatsappPulse{
+    0%{
+        box-shadow:0 0 0 0 rgba(37,211,102,.6);
+    }
+    70%{
+        box-shadow:0 0 0 18px rgba(37,211,102,0);
+    }
+    100%{
+        box-shadow:0 0 0 0 rgba(37,211,102,0);
+    }
+}
+.mobile-back-btn{
+    display:none;
+}
+
+@media(max-width:768px){
+
+    .desktop-back-btn{
+        display:none !important;
+    }
+
+    .mobile-back-btn{
+        display:flex;
+        justify-content:center;
+        margin:35px 0 10px;
+    }
+
+    .mobile-back-btn .back-articles-btn{
+        width:fit-content;
+        margin:0 auto;
+    }
+
+    .article-sidebar .sidebar-box{
+        text-align:center;
+    }
+
+    .article-sidebar .sidebar-box ul{
+        padding:0;
+        list-style-position:inside;
+    }
+
+    .article-sidebar .sidebar-box a{
+        text-align:center;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+    <header id="mainHeader">
+        <div class="header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="https://i.postimg.cc/fyxRn806/logo-dr-rola-almasri2.png" alt="اللوجو" class="logo-default">
+                    <img src="https://i.postimg.cc/SR8JQyH7/logo-dr-rola-almasri-01.png" alt="اللوجو" class="logo-scrolled">
+                </a>
+            </div>
+            <ul class="nav-links" id="sidebarLinks">
+                <li><a href="index.html">الرئيسية</a></li>
+                <li><a href="about.html">من نحن</a></li> 
+                <li><a href="services.html">الخدمات</a></li>
+                <li><a href="articles.html">المقالات</a></li>
+                <li><a href="gallery.html">الصور</a></li>
+                <li><a href="contact.html">تواصل معنا</a></li>
+            </ul>
+            <div class="menu-icon" id="menuToggle">☰</div>
+        </div>
+    </header>
+
+    <section class="articles-hero">
+        <h1>البوتوكس الوقائي</h1>
+        <p>متى نبدأ وكيف نحافظ على الشباب؟</p>
+    </section>
+
+<main class="article-details-page">
+    <div class="article-layout">
+
+        <article class="article-main-content">
+
+            <div class="article-cover">
+                <img src="https://i.postimg.cc/tTgTDtHR/Chat-GPT-Image-Jun-15-2026-11-26-09-AM.png" alt="البوتوكس الوقائي">
+            </div>
+
+            <div class="article-meta">
+                <span>📅 15 يناير 2026</span>
+                <span>بوتوكس</span>
+                <span>5 دقائق قراءة</span>
+            </div>
+
+            <h1>البوتوكس الوقائي</h1>
+
+            <p class="article-intro">
+                البوتوكس الوقائي هو استخدام البوتوكس بطريقة مدروسة قبل أن تصبح الخطوط التعبيرية عميقة وثابتة، بهدف الحفاظ على مظهر أكثر نعومة وشباباً.
+            </p>
+
+            <h2>ما هو البوتوكس الوقائي؟</h2>
+            <p>
+                يعمل البوتوكس على تقليل حركة عضلات معينة مسؤولة عن الخطوط التعبيرية، مثل خطوط الجبهة وبين الحاجبين وحول العين.
+            </p>
+
+            <h2>متى يمكن البدء؟</h2>
+            <p>
+                لا يوجد عمر ثابت يناسب الجميع. القرار يعتمد على قوة تعابير الوجه، نوع البشرة، ووجود خطوط بدأت تظهر حتى في وضع الراحة.
+            </p>
+
+            <div class="doctor-note">
+                <strong>تنبيه مهم:</strong>
+                الهدف من البوتوكس الوقائي ليس تجميد ملامح الوجه، بل الحفاظ على تعابير طبيعية مع تقليل الخطوط المبكرة.
+            </div>
+
+            <h2>هل النتيجة طبيعية؟</h2>
+            <p>
+                عندما يتم الحقن بكمية مناسبة وفي أماكن دقيقة، تكون النتيجة ناعمة وطبيعية دون تغيير شكل الوجه أو فقدان التعبير.
+            </p>
+
+            <ul class="article-list">
+                <li>يقلل الخطوط التعبيرية المبكرة.</li>
+                <li>يساعد على تأخير تعمق التجاعيد.</li>
+                <li>يحتاج إلى تقييم دقيق قبل الحقن.</li>
+                <li>الجرعة المناسبة أهم من الكمية الكبيرة.</li>
+            </ul>
+
+            <h2>الخلاصة</h2>
+            <p>
+                البوتوكس الوقائي خيار مناسب لبعض الحالات، لكنه يحتاج إلى تقييم طبي وخطة دقيقة للحفاظ على مظهر طبيعي ومتوازن.
+            </p>
+
+            <a href="articles.html" class="back-articles-btn desktop-back-btn">الرجوع للمقالات <i class="fas fa-arrow-left"></i></a>
+
+        </article>
+
+        <aside class="article-sidebar">
+            <div class="sidebar-box">
+                <h3>معلومات المقال</h3>
+                <p><strong>التصنيف:</strong> بوتوكس</p>
+                <p><strong>مدة القراءة:</strong> 5 دقائق</p>
+                <p><strong>تاريخ النشر:</strong> 15 يناير 2026</p>
+            </div>
+
+            <div class="sidebar-box">
+                <h3>نصائح قبل البوتوكس</h3>
+                <ul>
+                    <li>اطلبي نتيجة طبيعية.</li>
+                    <li>لا تختاري الجرعة الكبيرة بلا حاجة.</li>
+                    <li>ناقشي مناطق الحركة مع الطبيبة.</li>
+                    <li>اتبعي التعليمات بعد الحقن.</li>
+                </ul>
+            </div>
+
+            <div class="sidebar-box">
+                <h3>مقالات أخرى</h3>
+                <a href="article-filler-facts.html">حقائق عن حقن الفيلر</a>
+                <a href="article-celebrity-glow.html">سر نضارة المشاهير</a>
+                <a href="article-dark-circles.html">علاج الهالات السوداء</a>
+            </div>
+        </aside>
+        <div class="mobile-back-btn">
+    <a href="articles.html" class="back-articles-btn">الرجوع للمقالات <i class="fas fa-arrow-left"></i></a>
+</div>
+
+    </div>
+</main>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-column">
+                <div class="footer-logo">
+                    <img src="https://i.postimg.cc/fyxRn806/logo-dr-rola-almasri2.png" alt="لوجو دكتورة رولا المصري">
+                </div>
+                <p>نحن نهتم بصحة بشرتك وجمالك باستخدام أحدث التقنيات الطبية في عالم الجلدية والليزر.</p>
+                <div class="footer-social">
+    <a href="https://wa.me/966558887234" target="_blank" class="wa" title="واتساب">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <a href="https://www.instagram.com/dr.rolaalmasri" target="_blank" class="ig" title="إنستغرام">
+        <i class="fab fa-instagram"></i>
+    </a>
+
+    <a href="https://www.tiktok.com/@dr.rolaaalmasri" target="_blank" class="tk" title="تيك توك">
+        <i class="fab fa-tiktok"></i>
+    </a>
+
+    <a href="https://www.snapchat.com/@dr.rolaalmasri" target="_blank" class="snap" title="سناب شات">
+        <i class="fab fa-snapchat-ghost"></i>
+    </a>
+
+    <a href="https://x.com/dr_rolaalmasri" target="_blank" class="x" title="X">
+        <i class="fab fa-x-twitter"></i>
+    </a>
+</div>
+            </div>
+            <div class="footer-column">
+                <h3>روابط سريعة</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="about.html">من نحن</a></li>
+                    <li><a href="services.html">خدماتنا</a></li>
+                    <li><a href="articles.html">المقالات الطبية</a></li>
+                    <li><a href="gallery.html">الصور</a></li>
+                    <li><a href="contact.html">اتصل بنا</a></li> 
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>ساعات العمل</h3>
+                <ul class="footer-links">
+                    <li>السبت - الأربعاء: 10ص - 6م</li>
+                    <li>الخميس: 10ص - 2م</li>
+                    <li>الجمعة: عطلة رسمية</li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>جميع الحقوق محفوظة © 2026 دكتورة رولا المصري</p>
+        </div>
+        <a href="https://wa.me/966558887234"
+   class="floating-whatsapp"
+   target="_blank">
+   <i class="fab fa-whatsapp"></i>
+</a>
+
+<button class="scroll-top-btn" id="scrollTopBtn">
+    <i class="fa-solid fa-chevron-up"></i>
+</button>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('mainHeader');
+            if (window.scrollY > 50) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
+        });
+
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebarLinks = document.getElementById('sidebarLinks');
+
+        menuToggle.addEventListener('click', () => {
+            sidebarLinks.classList.toggle('active');
+            menuToggle.innerHTML = sidebarLinks.classList.contains('active') ? '✕' : '☰';
+        });
+
+        document.querySelectorAll('.nav-links li a').forEach(link => {
+            link.addEventListener('click', () => {
+                sidebarLinks.classList.remove('active');
+                menuToggle.innerHTML = '☰';
+            });
+        });
+
+        // كود تحديد الصفحة الحالية تلقائياً وإضافة التأثير عليها
+        const currentPage = window.location.pathname.split("/").pop();
+        const navItems = document.querySelectorAll('.nav-links li a');
+        
+        navItems.forEach(link => {
+            const linkHref = link.getAttribute('href');
+            // تفعيل الكلاس إذا كان الرابط يطابق الصفحة الحالية، أو إذا كانت الصفحة الرئيسية فارغة
+            if (linkHref === currentPage || (currentPage === '' && linkHref === 'index.html')) {
+                link.classList.add('active-link');
+            }
+        });
+        const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+window.addEventListener('scroll', () => {
+
+    if(window.scrollY > 400){
+        scrollTopBtn.classList.add('show');
+    }else{
+        scrollTopBtn.classList.remove('show');
+    }
+
+});
+
+scrollTopBtn.addEventListener('click', () => {
+
+    window.scrollTo({
+        top:0,
+        behavior:'smooth'
+    });
+
+});
+    </script>
+</body>
+</html>
